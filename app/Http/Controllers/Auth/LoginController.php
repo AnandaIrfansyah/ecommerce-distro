@@ -29,7 +29,7 @@ class LoginController extends Controller
             if ($user->hasRole('admin')) {
                 return redirect()->intended('dashboard');
             } elseif ($user->hasRole('user')) {
-                return redirect()->route('home.index');
+                return redirect()->intended('home');
             } else {
                 Auth::logout();
                 return redirect()->route('login')->withErrors([
