@@ -13,9 +13,16 @@ class ProductVariantController extends Controller
 {
     public function index()
     {
-        $variants = ProductVariant::with(['product', 'size', 'color'])->latest()->paginate(10);
-        return view('pages.admin.productVariant.index', compact('variants'));
+        $products = Product::with(['variants.size', 'variants.color'])->paginate(10);
+        return view('pages.admin.productVariant.index', compact('products'));
     }
+
+    public function show($id)
+    {
+        $product = Product::with(['variants.size', 'variants.color'])->findOrFail($id);
+        return view('pages.admin.productVariant.show', compact('product'));
+    }
+
 
     public function create()
     {

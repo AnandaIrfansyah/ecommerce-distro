@@ -27,4 +27,5 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::resource('home', HomeController::class);
+    Route::get('/products/category/{id}', [HomeController::class, 'byCategory'])->name('products.byCategory');
 });

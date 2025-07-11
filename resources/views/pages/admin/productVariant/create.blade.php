@@ -20,7 +20,7 @@
 
                             <div class="form-group">
                                 <label>Produk</label>
-                                <select name="product_id" class="form-control" required>
+                                <select name="product_id" class="form-control selectric" required>
                                     <option value="">-- Pilih Produk --</option>
                                     @foreach ($products as $p)
                                         <option value="{{ $p->id }}">{{ $p->name }}</option>
@@ -30,7 +30,7 @@
 
                             <div class="form-group">
                                 <label>Ukuran</label>
-                                <select name="size_id" class="form-control" required>
+                                <select name="size_id" class="form-control selectric" required>
                                     <option value="">-- Pilih Ukuran --</option>
                                     @foreach ($sizes as $s)
                                         <option value="{{ $s->id }}">{{ $s->name }}</option>
@@ -40,7 +40,7 @@
 
                             <div class="form-group">
                                 <label>Warna</label>
-                                <select name="color_id" class="form-control" required>
+                                <select name="color_id" class="form-control selectric" required>
                                     <option value="">-- Pilih Warna --</option>
                                     @foreach ($colors as $c)
                                         <option value="{{ $c->id }}">{{ $c->name }}</option>

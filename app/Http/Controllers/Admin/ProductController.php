@@ -7,6 +7,9 @@ use App\Models\Categories;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver as GdDriver;
+
 
 class ProductController extends Controller
 {
@@ -35,7 +38,17 @@ class ProductController extends Controller
         $data = $request->only('name', 'description', 'price', 'category_id');
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('uploads/products', 'public');
+            $image    = $request->file('image');
+            $filename = time() . '.' . $image->getClientOriginalExtension();
+            $path     = 'uploads/products/' . $filename;
+
+            $manager = new ImageManager(new GdDriver());
+            $resized = $manager->read($image)
+                ->contain(500, 400)
+                ->toJpeg();
+            Storage::disk('public')->put($path, $resized);
+
+            $data['image'] = $path;
         }
 
         Product::create($data);
@@ -68,7 +81,18 @@ class ProductController extends Controller
                 Storage::disk('public')->delete($product->image);
             }
 
-            $data['image'] = $request->file('image')->store('uploads/products', 'public');
+            $image    = $request->file('image');
+            $filename = time() . '.' . $image->getClientOriginalExtension();
+            $path     = 'uploads/products/' . $filename;
+
+            $manager = new ImageManager(new GdDriver());
+            $resized = $manager->read($image)
+                ->contain(500, 400)
+                ->toJpeg();
+
+            Storage::disk('public')->put($path, $resized);
+
+            $data['image'] = $path;
         }
 
         $product->update($data);

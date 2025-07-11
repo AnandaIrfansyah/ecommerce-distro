@@ -16,47 +16,47 @@
                 @if (session('success'))
                     <div class="alert alert-success">{{ session('success') }}</div>
                 @endif
-                
+
                 <div class="card">
                     <div class="card-body table-responsive">
-                        <table class="table table-striped text-center">
+                        <table class="table table-bordered table-striped text-center">
                             <thead class="bg-primary">
                                 <tr>
                                     <th class="text-white">No</th>
                                     <th class="text-white">Produk</th>
-                                    <th class="text-white">Ukuran</th>
-                                    <th class="text-white">Warna</th>
-                                    <th class="text-white">Stok</th>
+                                    <th class="text-white">Ukuran Tersedia</th>
+                                    <th class="text-white">Warna Tersedia</th>
+                                    <th class="text-white">Total Stok</th>
                                     <th class="text-white">#</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($variants as $v)
+                                @foreach ($products as $index => $product)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $v->product->name ?? '-' }}</td>
-                                        <td>{{ $v->size->name ?? '-' }}</td>
-                                        <td>{{ $v->color->name ?? '-' }}</td>
-                                        <td>{{ $v->stock }}</td>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>{{ $product->name }}</td>
                                         <td>
-                                            <a href="{{ route('productVariant.edit', $v->id) }}" class="btn btn-sm btn-info">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form action="{{ route('productVariant.destroy', $v->id) }}" method="POST"
-                                                class="d-inline-block" onsubmit="return confirm('Hapus varian ini?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button class="btn btn-sm btn-danger">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            @foreach ($product->variants->pluck('size.name')->unique() as $size)
+                                                <span class="badge badge-primary">{{ $size }}</span>
+                                            @endforeach
+                                        </td>
+                                        <td>
+                                            @foreach ($product->variants->pluck('color.name')->unique() as $color)
+                                                <span class="badge badge-warning">{{ $color }}</span>
+                                            @endforeach
+                                        </td>
+                                        <td>{{ $product->variants->sum('stock') }}</td>
+                                        <td>
+                                            <a href="{{ route('productVariant.show', $product->id) }}"
+                                                class="btn btn-sm btn-info">Detail</a>
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
 
-                        {{ $variants->onEachSide(1)->links('pagination::bootstrap-5') }}
+
+                        {{ $products->onEachSide(1)->links('pagination::bootstrap-5') }}
                     </div>
                 </div>
             </div>

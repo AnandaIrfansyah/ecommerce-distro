@@ -3,12 +3,24 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Categories;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        return view('pages.user.index');
+        $categories = Categories::all();
+        $products = Product::with('category')->get();
+        return view('pages.user.home', compact('categories', 'products'));
+    }
+
+    public function byCategory($id)
+    {
+        $category = Categories::findOrFail($id);
+        $products = Product::where('category_id', $id)->with('variants')->get();
+
+        return view('pages.user.filter.index', compact('products', 'category'));
     }
 }
