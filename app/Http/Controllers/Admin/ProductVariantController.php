@@ -13,7 +13,7 @@ class ProductVariantController extends Controller
 {
     public function index()
     {
-        $products = Product::with(['variants.size', 'variants.color'])->paginate(10);
+        $products = Product::whereHas('variants')->with('variants.size', 'variants.color')->paginate(10);
         return view('pages.admin.productVariant.index', compact('products'));
     }
 
@@ -23,6 +23,12 @@ class ProductVariantController extends Controller
         return view('pages.admin.productVariant.show', compact('product'));
     }
 
+    public function getSizesByProduct($id)
+    {
+        $product = Product::findOrFail($id);
+        $sizes = Size::where('category_id', $product->category_id)->get();
+        return response()->json($sizes);
+    }
 
     public function create()
     {

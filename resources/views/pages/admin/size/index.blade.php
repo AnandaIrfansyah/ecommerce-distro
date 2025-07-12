@@ -24,34 +24,37 @@
                                 <thead class="bg-primary">
                                     <tr>
                                         <th class="text-white">No</th>
+                                        <th class="text-white">Kategori</th>
                                         <th class="text-white">Size</th>
                                         <th class="text-white">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($sizes as $size)
+                                    @foreach ($categoriesWithSizes as $category)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $size->name }}</td>
+                                            <td>{{ $category->name }}</td>
                                             <td>
-                                                <a href="{{ route('size.edit', $size->id) }}" class="btn btn-sm btn-info">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-
-                                                <form action="{{ route('size.destroy', $size->id) }}" method="POST"
-                                                    class="d-inline-block" onsubmit="return confirm('Yakin hapus?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="btn btn-sm btn-danger">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
+                                                {{ $category->sizes->pluck('name')->implode(', ') }}
+                                            </td>
+                                            <td>
+                                                @foreach ($category->sizes as $size)
+                                                    <form action="{{ route('size.destroy', $size->id) }}" method="POST"
+                                                        class="d-inline-block"
+                                                        onsubmit="return confirm('Yakin hapus size {{ $size->name }}?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button class="btn btn-sm btn-danger mb-1">
+                                                            <i class="fas fa-trash"></i> {{ $size->name }}
+                                                        </button>
+                                                    </form>
+                                                @endforeach
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
+
                             </table>
-                            {{ $sizes->onEachSide(1)->links('pagination::bootstrap-5') }}
                         </div>
                     </div>
                 </div>

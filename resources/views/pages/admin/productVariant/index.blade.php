@@ -32,25 +32,27 @@
                             </thead>
                             <tbody>
                                 @foreach ($products as $index => $product)
-                                    <tr>
-                                        <td>{{ $index + 1 }}</td>
-                                        <td>{{ $product->name }}</td>
-                                        <td>
-                                            @foreach ($product->variants->pluck('size.name')->unique() as $size)
-                                                <span class="badge badge-primary">{{ $size }}</span>
-                                            @endforeach
-                                        </td>
-                                        <td>
-                                            @foreach ($product->variants->pluck('color.name')->unique() as $color)
-                                                <span class="badge badge-warning">{{ $color }}</span>
-                                            @endforeach
-                                        </td>
-                                        <td>{{ $product->variants->sum('stock') }}</td>
-                                        <td>
-                                            <a href="{{ route('productVariant.show', $product->id) }}"
-                                                class="btn btn-sm btn-info">Detail</a>
-                                        </td>
-                                    </tr>
+                                    @if ($product->variants->count() > 0)
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $product->name }}</td>
+                                            <td>
+                                                @foreach ($product->variants->pluck('size.name')->unique() as $size)
+                                                    <span class="badge badge-primary">{{ $size }}</span>
+                                                @endforeach
+                                            </td>
+                                            <td>
+                                                @foreach ($product->variants->pluck('color.name')->unique() as $color)
+                                                    <span class="badge badge-warning">{{ $color }}</span>
+                                                @endforeach
+                                            </td>
+                                            <td>{{ $product->variants->sum('stock') }}</td>
+                                            <td>
+                                                <a href="{{ route('productVariant.show', $product->id) }}"
+                                                    class="btn btn-sm btn-info">Detail</a>
+                                            </td>
+                                        </tr>
+                                    @endif
                                 @endforeach
                             </tbody>
                         </table>

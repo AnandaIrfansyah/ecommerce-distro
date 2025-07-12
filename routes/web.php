@@ -23,6 +23,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('color', ColorController::class);
     Route::resource('product', ProductController::class);
     Route::resource('productVariant', ProductVariantController::class);
+    Route::get('/admin/product/{id}/sizes', [ProductVariantController::class, 'getSizesByProduct']);
 });
 
 Route::middleware(['auth', 'role:user'])->group(function () {

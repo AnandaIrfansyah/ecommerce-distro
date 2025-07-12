@@ -21,6 +21,16 @@
                         <form action="{{ route('size.store') }}" method="POST">
                             @csrf
                             <div class="form-group">
+                                <label>Kategori</label>
+                                <select name="category_id" class="form-control selectric">
+                                    <option value="">-- Pilih Kategori --</option>
+                                    @foreach ($categories as $c)
+                                        <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="form-group">
                                 <label for="name">Size</label>
                                 <input type="text" name="name" class="form-control" required>
                             </div>

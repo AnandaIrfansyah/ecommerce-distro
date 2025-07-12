@@ -33,4 +33,8 @@ class Product extends Model
     {
         return $this->hasManyThrough(Size::class, ProductVariant::class, 'product_id', 'id', 'id', 'size_id')->distinct();
     }
+    public function variantsWithStock()
+    {
+        return $this->hasMany(ProductVariant::class)->where('stock', '>', 0);
+    }
 }

@@ -12,15 +12,17 @@ class HomeController extends Controller
     public function index()
     {
         $categories = Categories::all();
-        $products = Product::with('category')->get();
+        $products = Product::whereHas('variantsWithStock')->with('category')->get();
         return view('pages.user.home', compact('categories', 'products'));
     }
 
     public function byCategory($id)
     {
         $category = Categories::findOrFail($id);
-        $products = Product::where('category_id', $id)->with('variants')->get();
-
+        $products = Product::where('category_id', $id)
+            ->whereHas('variantsWithStock')
+            ->with('variants')
+            ->get();
         return view('pages.user.filter.index', compact('products', 'category'));
     }
 }

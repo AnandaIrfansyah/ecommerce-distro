@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Categories;
 use App\Models\Size;
 use Illuminate\Http\Request;
 
@@ -10,22 +11,27 @@ class SizeController extends Controller
 {
     public function index()
     {
-        $sizes = Size::latest()->paginate(10);
-        return view('pages.admin.size.index', compact('sizes'));
+        $categoriesWithSizes = Categories::with('sizes')->get();
+        return view('pages.admin.size.index', compact('categoriesWithSizes'));
     }
 
     public function create()
     {
-        return view('pages.admin.size.create');
+        $categories = Categories::all();
+        return view('pages.admin.size.create', compact('categories'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:50'
+            'name' => 'required|string|max:50',
+            'category_id' => 'nullable|exists:categories,id'
         ]);
 
-        Size::create($request->only('name'));
+        Size::create([
+            'name' => $request->name,
+            'category_id' => $request->category_id
+        ]);
 
         return redirect()->route('size.index')->with('success', 'Size berhasil ditambahkan.');
     }
@@ -33,17 +39,22 @@ class SizeController extends Controller
     public function edit($id)
     {
         $size = Size::findOrFail($id);
-        return view('pages.admin.size.edit', compact('size'));
+        $categories = Categories::all();
+        return view('pages.admin.size.edit', compact('size', 'categories'));
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|string|max:50'
+            'name' => 'required|string|max:50',
+            'category_id' => 'nullable|exists:categories,id'
         ]);
 
         $size = Size::findOrFail($id);
-        $size->update($request->only('name'));
+        $size->update([
+            'name' => $request->name,
+            'category_id' => $request->category_id
+        ]);
 
         return redirect()->route('size.index')->with('success', 'Size berhasil diperbarui.');
     }
