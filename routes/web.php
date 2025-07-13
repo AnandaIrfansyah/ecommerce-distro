@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Admin\SizeController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\User\DetailProductController;
 use App\Http\Controllers\User\HomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,4 +30,5 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::resource('home', HomeController::class);
     Route::get('/products/category/{id}', [HomeController::class, 'byCategory'])->name('products.byCategory');
+    Route::resource('detail', DetailProductController::class);
 });

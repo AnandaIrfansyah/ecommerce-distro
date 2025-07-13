@@ -107,8 +107,11 @@
                                             <div class="col-md-6 col-lg-4 col-xl-3">
                                                 <div class="border border-secondary rounded position-relative fruite-item">
                                                     <div class="fruite-img">
-                                                        <img src="{{ asset('storage/' . $product->image) }}"
-                                                            class="img-fluid w-100 rounded-top" alt="{{ $product->name }}">
+                                                        <a href="{{ route('detail.show', $product->id) }}">
+                                                            <img src="{{ asset('storage/' . $product->image) }}"
+                                                                class="img-fluid w-100 rounded-top"
+                                                                alt="{{ $product->name }}">
+                                                        </a>
                                                     </div>
                                                     <div class="text-white bg-secondary px-3 py-1 rounded position-absolute"
                                                         style="top: 10px; left: 10px;">
