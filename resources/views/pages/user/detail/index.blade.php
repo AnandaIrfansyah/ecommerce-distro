@@ -3,9 +3,28 @@
 @section('title', 'Detail')
 
 @push('style')
+    <style>
+        .out-of-stock {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
 @endpush
 
+
 @section('main')
+    @php
+        $variantsData = $product->variants
+            ->map(function ($v) {
+                return [
+                    'size_id' => $v->size_id,
+                    'color_id' => $v->color_id,
+                    'stock' => $v->stock,
+                ];
+            })
+            ->values();
+    @endphp
+
     <!-- Single Page Header start -->
     <div class="container-fluid page-header py-5">
         <h1 class="text-center text-white display-6">Shop Detail</h1>
@@ -41,16 +60,49 @@
                                 <i class="fa fa-star"></i>
                             </div>
                             <p class="mb-4">{{ $product->description }}</p>
-                            {{-- Pilih Size --}}
+                            <div class="mb-3">
+                                @php
+                                    $selectedSize = request('size');
+                                    $selectedColor = request('color');
+                                    $totalStock = $product->variants
+                                        ->filter(function ($variant) use ($selectedSize, $selectedColor) {
+                                            return (!$selectedSize || $variant->size_id == $selectedSize) &&
+                                                (!$selectedColor || $variant->color_id == $selectedColor);
+                                        })
+                                        ->sum('stock');
+                                @endphp
+
+                                <h6 class="fw-bold">Stok Tersedia: <span id="stok-tersedia"
+                                        class="text-primary">{{ $totalStock }}</span></h6>
+                            </div>
+
                             <div class="mb-3">
                                 <h6 class="fw-bold">Pilih Ukuran:</h6>
                                 <div class="d-flex flex-wrap gap-2">
-                                    @foreach ($product->sizes as $size)
-                                        <button class="btn btn-outline-secondary size-option"
-                                            data-size="{{ $size->id }}">
-                                            {{ $size->name }}
-                                        </button>
-                                    @endforeach
+                                    <div class="d-flex flex-wrap gap-2" id="size-buttons">
+                                        @foreach ($product->sizes as $size)
+                                            @php
+                                                $hasStock =
+                                                    $product->variants
+                                                        ->where('size_id', $size->id)
+                                                        ->when(
+                                                            request('color'),
+                                                            fn($q) => $q->where('color_id', request('color')),
+                                                        )
+                                                        ->sum('stock') > 0;
+
+                                                $isActive = request('size') == $size->id;
+                                            @endphp
+                                            <button type="button"
+                                                class="btn {{ $hasStock ? 'btn-outline-secondary' : 'btn-outline-danger disabled out-of-stock' }} {{ $isActive ? 'active' : '' }}"
+                                                data-size="{{ $size->id }}" {{ $hasStock ? '' : 'disabled' }}>
+                                                {{ $size->name }}
+                                            </button>
+                                        @endforeach
+                                        @if (request('color'))
+                                            <input type="hidden" name="color" value="{{ request('color') }}">
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
 
@@ -58,36 +110,65 @@
                             <div class="mb-3">
                                 <h6 class="fw-bold">Pilih Warna:</h6>
                                 <div class="d-flex flex-wrap gap-2">
-                                    @foreach ($product->colors as $color)
-                                        <button class="btn btn-outline-secondary color-option"
-                                            data-color="{{ $color->id }}">
-                                            {{ $color->name }}
-                                        </button>
-                                    @endforeach
+                                    <div class="d-flex flex-wrap gap-2" id="color-buttons">
+                                        @foreach ($product->colors as $color)
+                                            @php
+                                                $hasStock =
+                                                    $product->variants
+                                                        ->where('color_id', $color->id)
+                                                        ->when(
+                                                            request('size'),
+                                                            fn($q) => $q->where('size_id', request('size')),
+                                                        )
+                                                        ->sum('stock') > 0;
+
+                                                $isActive = request('color') == $color->id;
+                                            @endphp
+                                            <button type="button"
+                                                class="btn {{ $hasStock ? 'btn-outline-secondary' : 'btn-outline-danger disabled out-of-stock' }} {{ $isActive ? 'active' : '' }}"
+                                                data-color="{{ $color->id }}" {{ $hasStock ? '' : 'disabled' }}>
+                                                {{ $color->name }}
+                                            </button>
+                                        @endforeach
+                                        @if (request('size'))
+                                            <input type="hidden" name="size" value="{{ request('size') }}">
+                                        @endif
+                                    </div>
+
                                 </div>
                             </div>
 
-                            {{-- Hidden input buat kirim ke cart --}}
-                            <input type="hidden" id="selected-size" name="size_id">
-                            <input type="hidden" id="selected-color" name="color_id">
-
-                            <div class="input-group quantity mb-5" style="width: 100px;">
+                            <div class="input-group quantity mb-3" style="width: 100px;">
                                 <div class="input-group-btn">
-                                    <button class="btn btn-sm btn-minus rounded-circle bg-light border">
+                                    <button type="button" class="btn btn-sm btn-minus rounded-circle bg-light border">
                                         <i class="fa fa-minus"></i>
                                     </button>
                                 </div>
                                 <input type="text" class="form-control form-control-sm text-center border-0"
-                                    value="1">
+                                    value="1" id="quantity-input">
                                 <div class="input-group-btn">
-                                    <button class="btn btn-sm btn-plus rounded-circle bg-light border">
+                                    <button type="button" class="btn btn-sm btn-plus rounded-circle bg-light border">
                                         <i class="fa fa-plus"></i>
                                     </button>
                                 </div>
                             </div>
-                            <a href="#" class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary">
-                                <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
-                            </a>
+
+                            <form action="{{ route('cart.add') }}" method="POST" id="add-to-cart-form">
+                                @csrf
+                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                <input type="hidden" name="size_id" value="{{ request('size') }}">
+                                <input type="hidden" name="color_id" value="{{ request('color') }}">
+                                <input type="hidden" name="quantity" id="cart-quantity" value="1">
+
+                                <button type="submit"
+                                    class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary {{ $totalStock == 0 ? 'disabled' : '' }}"
+                                    {{ $totalStock == 0 ? 'disabled' : '' }}>
+                                    <i class="fa fa-shopping-bag me-2 text-primary"></i>
+                                    {{ $totalStock == 0 ? 'Stok Habis' : 'Add to cart' }}
+                                </button>
+                            </form>
+
+
                         </div>
                         <div class="col-lg-12">
                             <nav>
@@ -101,13 +182,16 @@
                                 </div>
                             </nav>
                             <div class="tab-content mb-5">
-                                <div class="tab-pane active" id="nav-about" role="tabpanel" aria-labelledby="nav-about-tab">
-                                    <p>The generated Lorem Ipsum is therefore always free from repetition injected humour,
+                                <div class="tab-pane active" id="nav-about" role="tabpanel"
+                                    aria-labelledby="nav-about-tab">
+                                    <p>The generated Lorem Ipsum is therefore always free from repetition injected
+                                        humour,
                                         or non-characteristic words etc.
                                         Susp endisse ultricies nisi vel quam suscipit </p>
                                     <p>Sabertooth peacock flounder; chain pickerel hatchetfish, pencilfish snailfish
                                         filefish Antarctic
-                                        icefish goldeye aholehole trumpetfish pilot fish airbreathing catfish, electric ray
+                                        icefish goldeye aholehole trumpetfish pilot fish airbreathing catfish, electric
+                                        ray
                                         sweeper.</p>
                                     <div class="px-2">
                                         <div class="row g-4">
@@ -121,7 +205,8 @@
                                                         <p class="mb-0">1 kg</p>
                                                     </div>
                                                 </div>
-                                                <div class="row text-center align-items-center justify-content-center py-2">
+                                                <div
+                                                    class="row text-center align-items-center justify-content-center py-2">
                                                     <div class="col-6">
                                                         <p class="mb-0">Country of Origin</p>
                                                     </div>
@@ -138,7 +223,8 @@
                                                         <p class="mb-0">Organic</p>
                                                     </div>
                                                 </div>
-                                                <div class="row text-center align-items-center justify-content-center py-2">
+                                                <div
+                                                    class="row text-center align-items-center justify-content-center py-2">
                                                     <div class="col-6">
                                                         <p class="mb-0">Сheck</p>
                                                     </div>
@@ -176,7 +262,8 @@
                                                     <i class="fa fa-star"></i>
                                                 </div>
                                             </div>
-                                            <p>The generated Lorem Ipsum is therefore always free from repetition injected
+                                            <p>The generated Lorem Ipsum is therefore always free from repetition
+                                                injected
                                                 humour, or non-characteristic
                                                 words etc. Susp endisse ultricies nisi vel quam suscipit </p>
                                         </div>
@@ -196,14 +283,16 @@
                                                     <i class="fa fa-star"></i>
                                                 </div>
                                             </div>
-                                            <p class="text-dark">The generated Lorem Ipsum is therefore always free from
+                                            <p class="text-dark">The generated Lorem Ipsum is therefore always free
+                                                from
                                                 repetition injected humour, or non-characteristic
                                                 words etc. Susp endisse ultricies nisi vel quam suscipit </p>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="nav-vision" role="tabpanel">
-                                    <p class="text-dark">Tempor erat elitr rebum at clita. Diam dolor diam ipsum et tempor
+                                    <p class="text-dark">Tempor erat elitr rebum at clita. Diam dolor diam ipsum et
+                                        tempor
                                         sit. Aliqu diam
                                         amet diam et eos labore. 3</p>
                                     <p class="mb-0">Diam dolor diam ipsum et tempor sit. Aliqu diam amet diam et eos
@@ -270,43 +359,102 @@
                                 <h4>{{ $item->name }}</h4>
                                 <p>{{ Str::limit($item->description, 60) }}</p>
                                 <div class="d-flex justify-content-between flex-lg-wrap">
-                                    <p class="text-dark fs-5 fw-bold">Rp {{ number_format($item->price, 0, ',', '.') }}
+                                    <p class="text-dark fs-5 fw-bold">Rp
+                                        {{ number_format($item->price, 0, ',', '.') }}
                                     </p>
+                                </div>
                             </div>
-                        </div>
                     @endforeach
                 </div>
 
             </div>
         </div>
     </div>
-    <!-- Single Product End -->
+    </div>
 @endsection
 
 @push('scripts')
     <script>
-        let selectedSize = null;
-        let selectedColor = null;
+        const variants = @json($variantsData);
+    </script>
 
-        document.querySelectorAll('.size-option').forEach(button => {
-            button.addEventListener('click', function() {
-                selectedSize = this.dataset.size;
-                document.getElementById('selected-size').value = selectedSize;
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let selectedSize = '{{ request('size') }}';
+            let selectedColor = '{{ request('color') }}';
 
-                // highlight terpilih
-                document.querySelectorAll('.size-option').forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
+            const sizeButtons = document.querySelectorAll('#size-buttons button');
+            const colorButtons = document.querySelectorAll('#color-buttons button');
+            const stokSpan = document.getElementById('stok-tersedia');
+            const quantityInput = document.getElementById('quantity-input');
+            const hiddenQuantity = document.getElementById('cart-quantity');
+
+            const sizeInput = document.querySelector('input[name="size_id"]');
+            const colorInput = document.querySelector('input[name="color_id"]');
+
+            let maxStock = {{ $totalStock }};
+
+            function getStock(size, color) {
+                return variants.filter(v =>
+                    (!size || v.size_id == size) &&
+                    (!color || v.color_id == color)
+                ).reduce((sum, v) => sum + v.stock, 0);
+            }
+
+            function updateStockDisplay() {
+                const stock = getStock(selectedSize, selectedColor);
+                stokSpan.textContent = stock;
+
+                if (parseInt(quantityInput.value) > stock) {
+                    quantityInput.value = stock > 0 ? stock : 1;
+                    hiddenQuantity.value = quantityInput.value;
+                }
+
+                maxStock = stock;
+            }
+
+            sizeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    selectedSize = btn.dataset.size;
+                    sizeInput.value = selectedSize;
+                    sizeButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    updateStockDisplay();
+                });
             });
-        });
 
-        document.querySelectorAll('.color-option').forEach(button => {
-            button.addEventListener('click', function() {
-                selectedColor = this.dataset.color;
-                document.getElementById('selected-color').value = selectedColor;
-
-                document.querySelectorAll('.color-option').forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
+            colorButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    selectedColor = btn.dataset.color;
+                    colorInput.value = selectedColor;
+                    colorButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    updateStockDisplay();
+                });
             });
+
+            document.querySelector('.btn-plus').addEventListener('click', () => {
+                let qty = parseInt(quantityInput.value);
+                if (qty < maxStock) {
+                    qty++;
+                    quantityInput.value = qty;
+                    hiddenQuantity.value = qty;
+                }
+            });
+
+            document.querySelector('.btn-minus').addEventListener('click', () => {
+                let qty = parseInt(quantityInput.value);
+                if (qty > 1) {
+                    qty--;
+                    quantityInput.value = qty;
+                    hiddenQuantity.value = qty;
+                }
+            });
+
+            quantityInput.value = 1;
+            hiddenQuantity.value = 1;
+
+            updateStockDisplay();
         });
     </script>
 @endpush
