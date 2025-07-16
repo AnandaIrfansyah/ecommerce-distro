@@ -12,9 +12,14 @@ class HomeController extends Controller
     public function index()
     {
         $categories = Categories::all();
-        $products = Product::whereHas('variantsWithStock')->with('category')->get();
+        $products = Product::whereHas('variantsWithStock')
+            ->with('category')
+            ->take(8)
+            ->get();
+
         return view('pages.user.home', compact('categories', 'products'));
     }
+
 
     public function byCategory($id)
     {

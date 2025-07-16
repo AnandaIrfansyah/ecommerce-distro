@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 
 class DetailProductController extends Controller
 {
+    
     public function show($id)
     {
         $product = Product::with(['category', 'variants.size', 'variants.color', 'variants'])->findOrFail($id);
@@ -28,7 +29,7 @@ class DetailProductController extends Controller
                 'stock' => $variant->stock,
             ];
         });
-        
+
 
         return view('pages.user.detail.index', compact('product', 'relatedProducts', 'categories', 'stockInfo'));
     }

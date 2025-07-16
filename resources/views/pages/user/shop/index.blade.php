@@ -1,8 +1,29 @@
 @extends('layouts.user')
 
-@section('title', 'Categories')
+@section('title', 'Shop')
 
 @push('style')
+    <style>
+        .pagination a {
+            padding: 8px 12px;
+            margin: 0 4px;
+            border: 1px solid #ccc;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .pagination a.active {
+            background-color: #ffb703;
+            color: #fff;
+            font-weight: bold;
+            border-color: #ffb703;
+        }
+
+        .pagination a.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
 @endpush
 
 @section('main')
@@ -34,35 +55,40 @@
                         </div>
                         <div class="col-6"></div>
                         <div class="col-xl-3">
-                            <div class="bg-light ps-3 py-3 rounded d-flex justify-content-between mb-4">
-                                <label for="fruits">Default Sorting:</label>
-                                <select id="fruits" name="fruitlist" class="border-0 form-select-sm bg-light me-3"
-                                    form="fruitform">
-                                    <option value="volvo">Nothing</option>
-                                    <option value="saab">Popularity</option>
-                                    <option value="opel">Organic</option>
-                                    <option value="audi">Fantastic</option>
-                                </select>
-                            </div>
+                            <form method="GET" action="{{ route('shop.index') }}" id="categoryForm">
+                                <div class="bg-light ps-3 py-3 rounded d-flex justify-content-between mb-4">
+                                    <label for="category">Filter Category:</label>
+                                    <select id="category" name="category" class="border-0 form-select-sm bg-light me-3"
+                                        onchange="document.getElementById('categoryForm').submit();">
+                                        <option value="">Semua Category</option>
+                                        @foreach ($categories as $category)
+                                            <option value="{{ $category->id }}"
+                                                {{ request('category') == $category->id ? 'selected' : '' }}>
+                                                {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </form>
+
                         </div>
                     </div>
                     <div class="row g-4">
                         <div class="col-lg-12">
                             <div class="row g-4 justify-content-center">
-                                @foreach ($products as $product)
+                                @forelse ($products as $product)
                                     @if ($product->variants->count() > 0)
-                                        <div class="col-md-6 col-lg-6 col-xl-3">
-                                            <div class="rounded border border-secondary position-relative fruite-item">
-                                                <a href="{{ route('detail.show', $product->id) }}">
-                                                    <div class="fruite-img">
+                                        <div class="col-md-6 col-lg-4 col-xl-3">
+                                            <div class="border border-secondary rounded position-relative fruite-item">
+                                                <div class="fruite-img">
+                                                    <a href="{{ route('detail.show', $product->id) }}">
                                                         <img src="{{ asset('storage/' . $product->image) }}"
-                                                            class="img-fluid w-100 rounded-top" alt="">
-                                                    </div>
-                                                </a>
+                                                            class="img-fluid w-100 rounded-top" alt="{{ $product->name }}">
+                                                    </a>
+                                                </div>
                                                 <div class="text-white bg-secondary px-3 py-1 rounded position-absolute"
                                                     style="top: 10px; left: 10px;">
-                                                    {{ $category->name }}
-                                                </div>
+                                                    {{ $product->category->name ?? 'No Category' }}</div>
                                                 <div class="p-4 border-top-0 rounded-bottom">
                                                     <h4>{{ $product->name }}</h4>
                                                     <p>{{ Str::limit($product->description, 80) }}</p>
@@ -79,7 +105,15 @@
                                             </div>
                                         </div>
                                     @endif
-                                @endforeach
+                                @empty
+                                    <p class="text-center">No products available.</p>
+                                @endforelse
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-center">
+                                        {{ $products->links('vendor.costum') }}
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>

@@ -89,9 +89,9 @@
                     <div class="col-lg-8 text-end">
                         <ul class="nav nav-pills d-inline-flex text-center mb-5">
                             <li class="nav-item">
-                                <a class="d-flex m-2 py-2 bg-light rounded-pill active" data-bs-toggle="pill"
-                                    href="#tab-1">
-                                    <span class="text-dark" style="width: 130px;">All Products</span>
+                                <a class="d-flex m-2 py-2 bg-secondary rounded-pill {{ request()->routeIs('shop.index') ? 'active' : '' }}"
+                                    href="{{ route('shop.index') }}">
+                                    <span class="text-white" style="width: 130px;">All Products</span>
                                 </a>
                             </li>
                         </ul>
