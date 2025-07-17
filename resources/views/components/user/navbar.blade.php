@@ -30,9 +30,13 @@
                             class="fas fa-search text-primary"></i></button>
                     <a href="{{ route('cart.index') }}" class="position-relative me-4 my-auto">
                         <i class="fa fa-shopping-bag fa-2x"></i>
-                        <span
-                            class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
-                            style="top: -5px; left: 15px; height: 20px; min-width: 20px;">3</span>
+                        @if ($cartCount > 0)
+                            <span
+                                class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
+                                style="top: -5px; left: 15px; height: 20px; min-width: 20px;">
+                                {{ $cartCount }}
+                            </span>
+                        @endif
                     </a>
                     <!-- User Icon with Dropdown -->
                     <div class="nav-item dropdown">
@@ -40,7 +44,9 @@
                             <i class="fas fa-user fa-2x"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end m-0 bg-secondary rounded-0">
-                            <!-- Logout Option -->
+                            <a href="{{ route('addres.index') }}" class="dropdown-item has-icon text-dark">
+                                <i class="fas fa-map-marker-alt"></i> Alamat
+                            </a>
                             <a href="#" class="dropdown-item has-icon text-danger"
                                 onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                 <i class="fas fa-sign-out-alt"></i> Logout

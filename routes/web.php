@@ -7,7 +7,9 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Admin\SizeController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\User\AlamatController;
 use App\Http\Controllers\User\CartController;
+use App\Http\Controllers\User\CheckoutController;
 use App\Http\Controllers\User\DetailProductController;
 use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\User\ShopController;
@@ -38,4 +40,6 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
     Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
     Route::post('/cart/update-quantity', [CartController::class, 'updateQuantity'])->name('cart.updateQuantity');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::resource('addres', AlamatController::class);
 });
