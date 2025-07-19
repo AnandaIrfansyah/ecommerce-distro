@@ -95,7 +95,19 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $item = \App\Models\CartItem::find($request->id);
+        $item = CartItem::with('product.variants')->find($request->id);
+
+        $availableStock = $item->product->variants
+            ->filter(function ($variant) use ($item) {
+                return (!$item->size_id || $variant->size_id == $item->size_id) &&
+                    (!$item->color_id || $variant->color_id == $item->color_id);
+            })
+            ->sum('stock');
+
+        if ($request->quantity > $availableStock) {
+            return back()->withErrors(['quantity' => 'Jumlah melebihi stok yang tersedia.']);
+        }
+
         $item->quantity = $request->quantity;
         $item->save();
 

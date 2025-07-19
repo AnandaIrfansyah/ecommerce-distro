@@ -37,6 +37,7 @@
 
 
 @section('main')
+
     <!-- Single Page Header start -->
     <div class="container-fluid page-header py-5">
         <h1 class="text-center text-white display-6">Cart</h1>
@@ -52,7 +53,7 @@
     <!-- Cart Page Start -->
     <div class="container-fluid py-5">
         <div class="container py-5">
-            <form action="{{ route('checkout.store') }}" method="POST" id="checkout-form">
+            <form action="{{ route('checkout.index') }}" method="GET" id="checkout-form">
                 @csrf
                 <div class="table-responsive">
 
@@ -201,6 +202,17 @@
 @endsection
 
 @push('scripts')
+    <script>
+        document.getElementById('checkout-form').addEventListener('submit', function(e) {
+            const checkedItems = document.querySelectorAll('.item-check:checked');
+
+            if (checkedItems.length === 0) {
+                e.preventDefault();
+                alert('Pilih minimal satu item untuk checkout.');
+            }
+        });
+    </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const qtyLinks = document.querySelectorAll('.edit-qty');

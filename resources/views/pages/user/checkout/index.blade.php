@@ -17,160 +17,250 @@
     </div>
     <!-- Single Page Header End -->
 
-
     <!-- Checkout Page Start -->
     <div class="container-fluid py-5">
         <div class="container py-5">
             <h1 class="mb-4">Billing details</h1>
-            <form action="#">
+            <form action="{{ route('checkout.store') }}" method="POST">
+                @csrf
                 <div class="row g-5">
-                    <div class="col-md-12 col-lg-6 col-xl-6">
+                    <div class="col-md-12 col-lg-6 col-xl-5">
                         <div class="form-item w-100">
-                            <label class="form-label my-3">Name<sup>*</sup></label>
-                            <input type="text" class="form-control">
+                            <label class="form-label my-3">Nama Pembeli</label>
+                            <input type="text" class="form-control" value="{{ $user->name }}" readonly>
                         </div>
+
                         <div class="form-item">
-                            <label class="form-label my-3">Company Name<sup>*</sup></label>
-                            <input type="text" class="form-control">
+                            <label class="form-label my-3">Pilih Alamat</label>
+                            <select class="form-select" name="address_id" required>
+                                <option value="">Pilih Alamat</option>
+                                @foreach ($addresses as $address)
+                                    <option value="{{ $address->id }}">
+                                        {{ $address->address_line1 }} - {{ $address->city }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
-                        <div class="form-item">
-                            <label class="form-label my-3">Address <sup>*</sup></label>
-                            <input type="text" class="form-control" placeholder="House Number Street Name">
+
+                        <div class="form-item mt-3">
+                            <label class="form-label">Alamat Lengkap Penerima</label>
+                            <div id="alamat-detail" class="p-3 border rounded bg-light text-secondary mb-3">
+                                Alamat akan ditampilkan setelah dipilih.
+                            </div>
                         </div>
-                        <div class="form-item">
-                            <label class="form-label my-3">Town/City<sup>*</sup></label>
-                            <input type="text" class="form-control">
+
+                        <button type="button" class="btn btn-outline-primary btn-sm mt-2">
+                            + Tambah Alamat Baru
+                        </button>
+
+                        <input type="hidden" name="user_id" value="{{ $user->id }}">
+                        @foreach ($items as $item)
+                            <input type="hidden" name="selected_items[]" value="{{ $item->id }}">
+                        @endforeach
+
+                        <div class="form-item mt-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" value="{{ $user->email }}" readonly>
                         </div>
-                        <div class="form-item">
-                            <label class="form-label my-3">Country<sup>*</sup></label>
-                            <input type="text" class="form-control">
-                        </div>
-                        <div class="form-item">
-                            <label class="form-label my-3">Postcode/Zip<sup>*</sup></label>
-                            <input type="text" class="form-control">
-                        </div>
-                        <div class="form-item">
-                            <label class="form-label my-3">Mobile<sup>*</sup></label>
-                            <input type="tel" class="form-control">
-                        </div>
-                        <div class="form-item">
-                            <label class="form-label my-3">Email Address<sup>*</sup></label>
-                            <input type="email" class="form-control">
-                        </div>
-                        <div class="form-check my-3">
-                            <input type="checkbox" class="form-check-input" id="Account-1" name="Accounts" value="Accounts">
-                            <label class="form-check-label" for="Account-1">Create an account?</label>
-                        </div>
-                        <hr>
-                        <div class="form-check my-3">
-                            <input class="form-check-input" type="checkbox" id="Address-1" name="Address" value="Address">
-                            <label class="form-check-label" for="Address-1">Ship to a different address?</label>
-                        </div>
-                        <div class="form-item">
-                            <textarea name="text" class="form-control" spellcheck="false" cols="30" rows="11"
-                                placeholder="Oreder Notes (Optional)"></textarea>
+
+                        <div class="form-item mt-4">
+                            <label class="form-label">Catatan Pesanan (Opsional)</label>
+                            <textarea name="note" class="form-control" rows="5" placeholder="Tulis catatan jika perlu..."></textarea>
                         </div>
                     </div>
-                    <div class="col-md-12 col-lg-6 col-xl-6">
+
+                    <div class="col-md-12 col-lg-6 col-xl-7">
                         <div class="table-responsive">
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th scope="col">Products</th>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Price</th>
-                                        <th scope="col">Qty</th>
-                                        <th scope="col">Total</th>
+                                        <th>Products</th>
+                                        <th>Name</th>
+                                        <th>Variasi</th>
+                                        <th>Price</th>
+                                        <th>Qty</th>
+                                        <th>Total</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @php $subtotal = 0; @endphp
-                                    @forelse ($selectedItems as $item)
-                                        @php
-                                            $product = $item->product;
-                                            $total = $product->price * $item->quantity;
-                                            $subtotal += $total;
-                                        @endphp
+                                    @forelse($items as $item)
                                         <tr>
-                                            <th scope="row">
-                                                <div class="d-flex align-items-center mt-2">
-                                                    <img src="{{ asset('storage/' . $product->image) }}"
-                                                        class="img-fluid rounded-circle" style="width: 90px; height: 90px;"
-                                                        alt="{{ $product->name }}">
-                                                </div>
-                                            </th>
-                                            <td class="py-5">{{ $product->name }}</td>
-                                            <td class="py-5">Rp {{ number_format($product->price, 0, ',', '.') }}</td>
+                                            <td>
+                                                <img src="{{ asset('storage/' . $item->product->image) }}"
+                                                    class="rounded-circle" style="width: 80px; height: 80px;"
+                                                    alt="{{ $item->product->name }}">
+                                            </td>
+                                            <td class="py-5">
+                                                {{ $item->product->name }}<br>
+                                            </td>
+                                            <td class="py-5">
+                                                <small>{{ $item->size?->name }} {{ $item->color?->name }}</small>
+                                            </td>
+                                            <td class="py-5">Rp {{ number_format($item->product->price, 0, ',', '.') }}
+                                            </td>
                                             <td class="py-5">{{ $item->quantity }}</td>
-                                            <td class="py-5">Rp {{ number_format($total, 0, ',', '.') }}</td>
+                                            <td class="py-5">
+                                                Rp
+                                                {{ number_format($item->product->price * $item->quantity, 0, ',', '.') }}
+                                            </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="text-center py-5">Tidak ada item yang dipilih</td>
+                                            <td colspan="6" class="text-center py-5">Tidak ada item yang dipilih</td>
                                         </tr>
                                     @endforelse
-
-                                    <tr>
-                                        <td colspan="3"></td>
-                                        <td class="py-5"><strong>Subtotal</strong></td>
-                                        <td class="py-5"><strong>Rp {{ number_format($subtotal, 0, ',', '.') }}</strong>
-                                        </td>
-                                    </tr>
                                 </tbody>
-
+                                <tfoot class="border-top">
+                                    <tr>
+                                        <td colspan="4"></td>
+                                        <td class="text-end"><strong>Subtotal</strong></td>
+                                        <td><strong>Rp {{ number_format($subtotal, 0, ',', '.') }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="4"></td>
+                                        <td class="text-end"><strong>Ongkos Kirim</strong></td>
+                                        <td><strong>Rp 10.000</strong></td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <td colspan="4"></td>
+                                        <td class="text-end"><strong>Total</strong></td>
+                                        <td><strong>Rp {{ number_format($subtotal + 10000, 0, ',', '.') }}</strong></td>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
-                        <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
-                            <div class="col-12">
-                                <div class="form-check text-start my-3">
-                                    <input type="checkbox" class="form-check-input bg-primary border-0" id="Transfer-1"
-                                        name="Transfer" value="Transfer">
-                                    <label class="form-check-label" for="Transfer-1">Direct Bank Transfer</label>
+
+                        <div class="mb-5">
+                            <h5 class="mb-3">Metode Pengiriman</h5>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <input class="btn-check" type="radio" name="shipping_method" id="shipping-hemat"
+                                        value="hemat" checked>
+                                    <label class="btn btn-outline-success w-100 text-start p-3 rounded shadow-sm"
+                                        for="shipping-hemat">
+                                        <strong>Hemat</strong><br>
+                                        <small class="text-secondary">Rp 10.000 • Estimasi 3–5 hari</small>
+                                    </label>
                                 </div>
-                                <p class="text-start text-dark">Make your payment directly into our bank account. Please
-                                    use your Order ID as the payment reference. Your order will not be shipped until the
-                                    funds have cleared in our account.</p>
-                            </div>
-                        </div>
-                        <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
-                            <div class="col-12">
-                                <div class="form-check text-start my-3">
-                                    <input type="checkbox" class="form-check-input bg-primary border-0" id="Payments-1"
-                                        name="Payments" value="Payments">
-                                    <label class="form-check-label" for="Payments-1">Check Payments</label>
+                                <div class="col-md-4">
+                                    <input class="btn-check" type="radio" name="shipping_method" id="shipping-standar"
+                                        value="standar">
+                                    <label class="btn btn-outline-success w-100 text-start p-3 rounded shadow-sm"
+                                        for="shipping-standar">
+                                        <strong>Standar</strong><br>
+                                        <small class="text-secondary">Rp 20.000 • Estimasi 2–3 hari</small>
+                                    </label>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
-                            <div class="col-12">
-                                <div class="form-check text-start my-3">
-                                    <input type="checkbox" class="form-check-input bg-primary border-0" id="Delivery-1"
-                                        name="Delivery" value="Delivery">
-                                    <label class="form-check-label" for="Delivery-1">Cash On Delivery</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
-                            <div class="col-12">
-                                <div class="form-check text-start my-3">
-                                    <input type="checkbox" class="form-check-input bg-primary border-0" id="Paypal-1"
-                                        name="Paypal" value="Paypal">
-                                    <label class="form-check-label" for="Paypal-1">Paypal</label>
+                                <div class="col-md-4">
+                                    <input class="btn-check" type="radio" name="shipping_method" id="shipping-prioritas"
+                                        value="prioritas">
+                                    <label class="btn btn-outline-success w-100 text-start p-3 rounded shadow-sm"
+                                        for="shipping-prioritas">
+                                        <strong>Prioritas</strong><br>
+                                        <small class="text-secondary">Rp 40.000 • Estimasi 1 hari</small>
+                                    </label>
                                 </div>
                             </div>
                         </div>
-                        <div class="row g-4 text-center align-items-center justify-content-center pt-4">
-                            <button type="button"
-                                class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">Place
-                                Order</button>
+
+                        <div class="mb-5">
+                            <h5 class="mb-3">Metode Pembayaran</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6 col-lg-3">
+                                    <input type="radio" class="btn-check" name="payment_method" id="pay-bank"
+                                        value="bank_transfer" checked>
+                                    <label class="btn btn-outline-success w-100 p-3 rounded shadow-sm" for="pay-bank">
+                                        <strong>Bank Transfer</strong><br>
+                                        <small class="text-secondary">Transfer via rekening bank</small>
+                                    </label>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <input type="radio" class="btn-check" name="payment_method" id="pay-ewallet"
+                                        value="e_wallet">
+                                    <label class="btn btn-outline-success w-100 p-3 rounded shadow-sm" for="pay-ewallet">
+                                        <strong>Dompet Digital</strong><br>
+                                        <small class="text-secondary">OVO / DANA / GOPAY dll</small>
+                                    </label>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <input type="radio" class="btn-check" name="payment_method" id="pay-cod"
+                                        value="cod">
+                                    <label class="btn btn-outline-success w-100 p-3 rounded shadow-sm" for="pay-cod">
+                                        <strong>COD</strong><br>
+                                        <small class="text-secondary">Bayar saat barang sampai</small>
+                                    </label>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <input type="radio" class="btn-check" name="payment_method" id="pay-store"
+                                        value="store">
+                                    <label class="btn btn-outline-success w-100 p-3 rounded shadow-sm" for="pay-store">
+                                        <strong>Gerai Offline</strong><br>
+                                        <small class="text-secondary">Bayar di toko terdekat</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center pt-4">
+                            <button type="submit"
+                                class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">
+                                Place Order
+                            </button>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-    <!-- Checkout Page End -->
 @endsection
 
 @push('scripts')
+    <script>
+        const alamatDropdown = document.querySelector('select[name="address_id"]');
+        const alamatDetail = document.getElementById('alamat-detail');
+        const alamatData = @json($addresses);
+
+        alamatDropdown.addEventListener('change', function() {
+            const selected = alamatData.find(a => a.id == this.value);
+            if (selected) {
+                alamatDetail.innerHTML = `
+                ${selected.name} | ${selected.phone}<br>
+                ${selected.address_line1}, ${selected.city}, ${selected.province}, ${selected.country}, ${selected.postal_code}.<br>
+            `;
+            } else {
+                alamatDetail.innerText = 'Alamat akan ditampilkan setelah dipilih.';
+            }
+        });
+    </script>
+    <script>
+        const shippingFees = {
+            hemat: 10000,
+            standar: 20000,
+            prioritas: 40000
+        };
+
+        const shippingRadios = document.querySelectorAll('input[name="shipping_method"]');
+        const shippingCostCell = document.querySelector('tfoot tr:nth-child(2) td:last-child strong');
+        const totalCell = document.querySelector('tfoot tr:nth-child(3) td:last-child strong');
+
+        const subtotal = {{ $subtotal }};
+
+        function updateShippingAndTotal() {
+            const selected = document.querySelector('input[name="shipping_method"]:checked');
+            const selectedFee = shippingFees[selected.value];
+
+            const formatRupiah = (angka) => {
+                return 'Rp ' + angka.toLocaleString('id-ID');
+            };
+
+            shippingCostCell.textContent = formatRupiah(selectedFee);
+            totalCell.textContent = formatRupiah(subtotal + selectedFee);
+        }
+
+        shippingRadios.forEach(radio => {
+            radio.addEventListener('change', updateShippingAndTotal);
+        });
+
+        updateShippingAndTotal();
+    </script>
 @endpush

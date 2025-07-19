@@ -85,11 +85,11 @@ class AlamatController extends Controller
 
 
 
-    public function destroy(Addres $address)
+    public function destroy($id)
     {
-        $this->authorize('delete', $address);
-
+        $address = Addres::findOrFail($id);
         $address->delete();
+
         return redirect()->route('addres.index')->with('success', 'Alamat berhasil dihapus.');
     }
 }
