@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ColorController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PesananController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Admin\SizeController;
@@ -30,6 +31,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('product', ProductController::class);
     Route::resource('productVariant', ProductVariantController::class);
     Route::get('/admin/product/{id}/sizes', [ProductVariantController::class, 'getSizesByProduct']);
+    Route::resource('pesanan', PesananController::class);
 });
 
 Route::middleware(['auth', 'role:user'])->group(function () {
@@ -43,5 +45,6 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::post('/cart/update-quantity', [CartController::class, 'updateQuantity'])->name('cart.updateQuantity');
     Route::resource('checkout', CheckoutController::class);
     Route::resource('sukses', SuksesController::class);
+    Route::patch('/orders/{id}/cancel', [SuksesController::class, 'cancel'])->name('user.orders.cancel');
     Route::resource('addres', AlamatController::class);
 });

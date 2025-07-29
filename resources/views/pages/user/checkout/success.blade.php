@@ -60,6 +60,13 @@
     </style>
 @endpush
 
+@if (session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
 @section('main')
     <div class="container py-5 page-content">
         <div class="order-box bg-white shadow rounded p-4 p-md-5">
@@ -109,17 +116,18 @@
                     <strong>Rp {{ number_format($order->subtotal, 0, ',', '.') }}</strong>
                 </div>
                 <div class="d-flex justify-content-between mb-2">
-                    <span class="text-muted">Shipping</span>
+                    <span class="text-muted">Biaya Pengiriman</span>
                     <strong>Rp {{ number_format($order->shipping_fee, 0, ',', '.') }}</strong>
                 </div>
                 <div class="d-flex justify-content-between">
-                    <span class="text-muted">Payment Method</span>
+                    <span class="text-muted">Metode Pembayaran</span>
                     <strong>{{ ucwords(str_replace('_', ' ', $order->payment_method)) }}</strong>
                 </div>
             </div>
 
             <div class="text-center mt-5">
-                <a href="#" class="btn btn-outline-primary px-4 py-2 rounded me-2">Track Your Order</a>
+                <a href="{{ route('sukses.index') }}" class="btn btn-outline-primary px-4 py-2 rounded me-2">Track Your
+                    Order</a>
                 <a href="{{ route('home.index') }}" class="btn btn-outline-secondary px-4 py-2 rounded">Continue
                     Shopping</a>
             </div>

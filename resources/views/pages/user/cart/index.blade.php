@@ -127,7 +127,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center py-5">Keranjang kamu kosong</td>
+                                    <td colspan="8" class="text-center py-5">Keranjang kamu kosong</td>
                                 </tr>
                             @endforelse
                         </tbody>

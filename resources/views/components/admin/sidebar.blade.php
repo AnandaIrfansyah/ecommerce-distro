@@ -15,6 +15,14 @@
             </li>
             <li class="menu-header">Manajemen Produk</li>
 
+            <li class="nav-item {{ Request::is('pesanan') ? 'active' : '' }}">
+                <a href="{{ url('pesanan') }}" class="nav-link">
+                    <i class="fas fa-home"></i> <span>Pesanan</span>
+                </a>
+            </li>
+
+            <li class="menu-header">Manajemen Produk</li>
+
             <li class="nav-item dropdown {{ Request::is('product') || Request::is('productVariant') ? 'active' : '' }}">
                 <a href="#" class="nav-link has-dropdown">
                     <i class="fas fa-box-open"></i> <span>Products</span>

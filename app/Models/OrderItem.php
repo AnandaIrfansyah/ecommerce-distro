@@ -16,7 +16,6 @@ class OrderItem extends Model
         'total',
     ];
 
-    // Relationships
     public function order()
     {
         return $this->belongsTo(Order::class);
